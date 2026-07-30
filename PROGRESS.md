@@ -33,10 +33,18 @@ of thousands). Pivoted to categories based on real keyword frequency instead:
 - [x] Pushed to GitHub: https://github.com/cristianowen/fashion-trend-forecasting
   (data/ folder excluded via .gitignore — too large for GitHub)
 
-## Next steps (Phase 2)
-- [ ] Join tagged articles against transactions_train.csv using DuckDB
-- [ ] Build daily/weekly demand time series per subcategory
-- [ ] Save aggregated time series to data/processed/
+## Completed (continued)
+- [x] Phase 2: Joined tagged articles against transactions_train.csv using DuckDB 
+  (inner join on article_id, grouped by date + category)
+- [x] Phase 2: Built daily demand time series — trousers_ts (3670 rows, 5 fit 
+  categories) and jackets_ts (2200 rows, 3 style categories)
+- [x] Phase 2: Saved both to data/processed/trousers_daily_sales.csv and 
+  jackets_daily_sales.csv
+
+## Next steps (Phase 3 — EDA)
+- [ ] Plot each subcategory's daily/weekly sales over time
+- [ ] Look for seasonality, trend direction (is skinny declining? is wide rising?)
+- [ ] Note any data sparsity issues before moving to forecasting
 
 ## Files
 - `notebooks/01_explore_articles.ipynb` — Phase 1 (tagging)
