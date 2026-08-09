@@ -67,10 +67,30 @@ of thousands). Pivoted to categories based on real keyword frequency instead:
 modeling approaches — trousers has a real underlying trend to capture, jackets is 
 dominated by seasonality rather than trend.
 
-## Next steps (Phase 4 — Forecasting)
-- [ ] Choose forecasting approach per category type (trend-dominant vs seasonal-dominant)
-- [ ] Build baseline models, then compare against ML approaches (XGBoost/LightGBM)
-- [ ] Evaluate with MAPE/RMSE against baseline
+## Completed (continued)
+- [x] Phase 4: Built naive baseline (MAE 531.0) and 7-day moving average baseline 
+  (MAE 595.6 — worse than naive, since moving average lags behind a real sustained 
+  trend) for skinny_slim trousers
+- [x] Phase 4: Built linear regression trend model for skinny_slim — beat naive 
+  baseline (MAE 460.2, ~13% improvement). Confirmed slope (-2.58 units/day decline) 
+  and intercept by deriving the least-squares formula manually and matching sklearn's 
+  output exactly.
+- [x] Phase 4: Used 80/20 chronological train/test split (train: Sep 2018–Apr 2020, 
+  test: Apr–Sep 2020). Note: test period overlaps COVID-19 disruption — worth 
+  revisiting if results look off.
+
+## Next steps (Phase 4, continued)
+- [ ] Repeat naive/moving-avg/linear model comparison for remaining trouser categories 
+  (tapered, straight, wide_relaxed, regular)
+- [ ] Build seasonal-aware model for jackets (linear trend likely won't work — jackets 
+  showed strong annual cyclicality, not a sustained trend, in Phase 3)
+- [ ] Try XGBoost/LightGBM with richer features (day of week, month, recent lags) to 
+  see if it beats linear regression
+- [ ] Once forecasting models are solid, move to Phase 5: inventory policy 
+  (safety stock, reorder points)
+
+## Files
+- `notebooks/04_forecasting.ipynb` — Phase 4 (in progress, skinny_slim model built)
 
 ## Files
 - `notebooks/01_explore_articles.ipynb` — Phase 1 (tagging)
