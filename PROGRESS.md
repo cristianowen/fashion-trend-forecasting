@@ -79,15 +79,38 @@ dominated by seasonality rather than trend.
   test: Apr–Sep 2020). Note: test period overlaps COVID-19 disruption — worth 
   revisiting if results look off.
 
+## Completed (continued)
+- [x] Phase 4: Built naive baseline and linear regression trend model, evaluated 
+  across all 5 trouser fit categories
+- [x] Phase 4: CAUGHT AND FIXED a methodology bug — initial skinny_slim comparison 
+  (naive 531.0 vs linear 460.2) was invalid because naive was measured across the 
+  full dataset while linear was measured only on the test set. Rebuilt evaluation 
+  so both models are scored on the identical held-out test period (last 20% of days, 
+  chronological split).
+
+## Corrected Phase 4 results (naive vs linear regression, same test period)
+
+| Category      | MAE Naive | MAE Linear | Slope   | Naive wins? |
+|---------------|-----------|------------|---------|-------------|
+| tapered       | 249.0     | 323.4      | +0.525  | Yes         |
+| straight      | 164.9     | 259.9      | -0.030  | Yes         |
+| skinny_slim   | 280.5     | 460.2      | -2.583  | Yes         |
+| wide_relaxed  | 44.7      | 87.2       | -0.322  | Yes         |
+| regular       | 16.7      | 133.6      | +0.285  | Yes         |
+
+**Finding**: Naive baseline beats linear regression on every trouser category once 
+evaluated fairly. Likely causes: (1) test period overlaps COVID-19 disruption, which 
+may have broken the "normal" linear trend the model learned from training data; 
+(2) a straight line can't adapt to trends that slow down, speed up, or reverse — 
+real fashion trends aren't perfectly linear.
+
 ## Next steps (Phase 4, continued)
-- [ ] Repeat naive/moving-avg/linear model comparison for remaining trouser categories 
-  (tapered, straight, wide_relaxed, regular)
-- [ ] Build seasonal-aware model for jackets (linear trend likely won't work — jackets 
-  showed strong annual cyclicality, not a sustained trend, in Phase 3)
-- [ ] Try XGBoost/LightGBM with richer features (day of week, month, recent lags) to 
-  see if it beats linear regression
-- [ ] Once forecasting models are solid, move to Phase 5: inventory policy 
-  (safety stock, reorder points)
+- [ ] Investigate whether COVID-period test data is skewing results — consider 
+  testing on a pre-COVID holdout period as a sanity check
+- [ ] Try a model that can adapt to changing trend rate (e.g., shorter rolling 
+  windows, or weighting recent data more heavily)
+- [ ] Build seasonal-aware model for jackets
+- [ ] Try XGBoost/LightGBM with richer features (day of week, month, lagged values)
 
 ## Files
 - `notebooks/04_forecasting.ipynb` — Phase 4 (in progress, skinny_slim model built)
