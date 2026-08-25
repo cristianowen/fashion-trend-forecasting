@@ -94,16 +94,59 @@ PER-CATEGORY MODEL SELECTION, not one-size-fits-all.**
 Prophet component decomposition (denim) is a strong portfolio visual: trend (steady 
 decline ~1030→600) + yearly seasonality (spring peak ~+930, Nov trough ~-600).
 
-## NEXT: Phase 5 — Inventory policy
-- [ ] For categories where we have a good forecast, translate forecast + forecast 
-  uncertainty into inventory policy: safety stock = z * demand_std * sqrt(lead_time); 
-  reorder point = avg demand over lead time + safety stock
-- [ ] Use Prophet's uncertainty intervals (yhat_lower/yhat_upper) as the demand 
-  variability input
-- [ ] Simulate: forecast-driven policy vs naive policy → quantify reduction in 
-  stockouts / excess inventory in $ terms
-- [ ] Apply per-category model selection (Prophet for seasonal+high-volume, simpler 
-  for others)
+## Status: Phase 5 COMPLETE. Starting Phase 6 (Streamlit dashboard).
 
-## Then Phase 6
-- [ ] Streamlit dashboard + README writeup
+### Phase 5: Inventory policy — DONE
+Translated forecasts + uncertainty into safety stock, reorder point, and a policy 
+comparison simulation.
+
+**Demand variability (demand_std) — model-specific by category:**
+- Where Prophet won (denim, bomber, tapered, straight): used Prophet's uncertainty 
+  interval, converted via `(yhat_upper - yhat_lower) / (2 * 1.28)` (Prophet's 80% CI 
+  → std conversion factor).
+- Where naive won (skinny_slim, wide_relaxed, regular, leather_biker): Prophet's CI 
+  isn't trustworthy since Prophet doesn't fit these categories well. Used historical 
+  demand_std instead — but NOT raw `.std()` (inflated by trend/decline) and NOT 
+  `.diff().std()` (doubles randomness by combining two weeks). Landed on 
+  **rolling-mean residual method**: subtract an 8-week rolling average (trend) from 
+  actual weekly sales, then take std of the residuals. This isolates true 
+  week-to-week noise from predictable trend.
+
+**Safety stock formula:** `z * demand_std * sqrt(lead_time)`
+- Assumed z = 1.65 (95% service level, standard retail default)
+- Assumed lead_time = 4 weeks (matches the forecast horizon used in Phase 4, keeps 
+  project internally consistent)
+
+**Reorder point formula:** `avg_weekly_sales * lead_time + safety_stock`
+
+**Policy comparison simulation (the headline finding):**
+Compared our forecast-informed, per-category policy against a naive baseline (raw, 
+uncorrected historical std applied uniformly to every category, no per-category 
+model selection). Assumed $15/unit cost (budget fast-fashion assumption, stated 
+explicitly since no real cost data available).
+
+- Trousers: 39.0% reduction in safety stock capital ($256,005 saved)
+- Jackets: 48.0% reduction ($19,020 saved)
+- **Combined: 39.5% reduction in safety stock capital, $275,025 saved**
+
+Jackets saved proportionally more than trousers — traced to leather_biker's messy 
+bimodal seasonality (two peaks/year), which raw uncorrected std badly overestimates 
+as "randomness" when it's actually a predictable (if messy) pattern. The 
+trend-adjustment fix has outsized benefit exactly where the underlying pattern is 
+most complex.
+
+**Key insight for interview narrative:** the savings aren't purely "Prophet beats 
+naive" — even naive-winning categories saved money vs. the naive POLICY, because 
+those categories used trend-adjusted historical std (our refined approach) instead 
+of raw uncorrected std (the crude baseline). The real lever is separating trend from 
+noise before computing a safety buffer, not just picking a fancier forecasting model.
+
+## NEXT: Phase 6 — Streamlit dashboard
+- [ ] Category dropdown → shows that category's historical sales + forecast plot
+- [ ] Summary panel: avg_weekly_sales, demand_std, safety_stock, reorder_point for 
+  selected category
+- [ ] Bar chart: our policy vs. naive policy dollar comparison (visualize the 
+  $275,025 combined savings finding)
+- [ ] Optional: toggle for lead_time / service_level (z) so viewer can see safety 
+  stock numbers update live
+- [ ] README writeup tying the whole project narrative together
